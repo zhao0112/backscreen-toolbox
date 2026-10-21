@@ -41,6 +41,7 @@ public final class ToolboxActivity extends Activity {
     public static final int F_MUSIC = 3;
     public static final int F_SPECTRUM = 4;
     public static final int F_FROG = 5;
+    public static final int F_DRAW = 6;
 
     private BackScreen backScreen;
     // 模块状态统一放在 RenderHub，页面只读
@@ -197,6 +198,22 @@ public final class ToolboxActivity extends Activity {
             });
         } catch (Throwable t) { Log.e(TAG, "notif bind failed", t); }
 
+        // 手绘入口
+        try {
+            View drawTile = findViewById(R.id.tb_tile_draw);
+            if (drawTile != null) {
+                drawTile.setOnClickListener(new View.OnClickListener() {
+                    @Override public void onClick(View v) {
+                        try {
+                            startActivity(new Intent(ToolboxActivity.this, DrawActivity.class));
+                        } catch (Throwable t) {
+                            Log.e(TAG, "open draw failed", t);
+                        }
+                    }
+                });
+            }
+        } catch (Throwable t) { Log.e(TAG, "draw bind failed", t); }
+
         // 底部导航（共享组件）
         try {
             nav = new NavBar(this, findViewById(R.id.tb_root));
@@ -318,6 +335,15 @@ public final class ToolboxActivity extends Activity {
                 }
             } catch (Throwable ignore) { }
 
+            // 手绘状态
+            try {
+                TextView ds = findViewById(R.id.tb_draw_state);
+                if (ds != null) {
+                    ds.setText(hub.hasDrawing() ? "已有画面 · 可重新编辑" : "画一张，投射到背屏");
+                    ds.setTextColor(hub.hasDrawing() ? 0xFF35E0B0 : 0xFF9BA3AD);
+                }
+            } catch (Throwable ignore) { }
+
             // 内容卡的选中态
             int[] ids = { R.id.tb_tile_video, R.id.tb_tile_timer, R.id.tb_tile_msg,
                           R.id.tb_tile_music, R.id.tb_tile_spec, R.id.tb_tile_frog };
@@ -389,7 +415,7 @@ public final class ToolboxActivity extends Activity {
     }
 
     private static final String[] CONTENT_NAMES = {
-        "动画", "计时器", "消息", "音乐", "频谱", "NOMI 表情"
+        "动画", "计时器", "消息", "音乐", "频谱", "NOMI 表情", "手绘"
     };
 
     /** 致命错误：用系统对话框，不依赖本 App 布局。 */

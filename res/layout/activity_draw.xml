@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/canvas">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="24dp">
+
+            <!-- 标题 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="手绘"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02"
+                    android:textColor="@color/ink" />
+
+                <TextView
+                    android:id="@+id/dr_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="画笔模式"
+                    android:textSize="12.5sp"
+                    android:textColor="@color/ink3" />
+            </LinearLayout>
+
+            <!-- 画布：17x23 点阵，竖向 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_hero"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <com.local.backscreengame.DrawView
+                    android:id="@+id/dr_canvas"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:text="直接在背屏格子上画 · 每一笔都是真实像素"
+                    android:textSize="11sp"
+                    android:textColor="@color/ink4" />
+            </LinearLayout>
+
+            <!-- 工具行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/dr_eraser"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_ghost"
+                    android:gravity="center"
+                    android:text="橡皮"
+                    android:textSize="14sp"
+                    android:textColor="@color/ink2"
+                    android:clickable="true" android:focusable="true" />
+
+                <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+                <TextView
+                    android:id="@+id/dr_undo"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_ghost"
+                    android:gravity="center"
+                    android:text="撤销"
+                    android:textSize="14sp"
+                    android:textColor="@color/ink2"
+                    android:clickable="true" android:focusable="true" />
+
+                <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+                <TextView
+                    android:id="@+id/dr_clear"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_ghost"
+                    android:gravity="center"
+                    android:text="清空"
+                    android:textSize="14sp"
+                    android:textColor="@color/ink2"
+                    android:clickable="true" android:focusable="true" />
+            </LinearLayout>
+
+            <!-- 投射 -->
+            <TextView
+                android:id="@+id/dr_project"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_btn_primary"
+                android:gravity="center"
+                android:text="投射到背屏"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_accent"
+                android:clickable="true" android:focusable="true" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -30,6 +30,25 @@ public final class RenderHub {
     public final SpriteAnim nomi = NomiFace.anim();
     public final TimerModule timer = TimerStore.get();
 
+    /** 手绘画布（全局一份，切页面也不丢）。 */
+    private final int[] drawFrame = new int[DotCanvas.COLS * DotCanvas.ROWS];
+    private boolean hasDrawing = false;
+
+    /** 设置手绘画面（来自 DrawView）。 */
+    public void setDrawing(int[] frame) {
+        if (frame == null) return;
+        System.arraycopy(frame, 0, drawFrame, 0,
+                Math.min(frame.length, drawFrame.length));
+        hasDrawing = true;
+    }
+
+    public boolean hasDrawing() { return hasDrawing; }
+
+    public void clearDrawing() {
+        java.util.Arrays.fill(drawFrame, 0);
+        hasDrawing = false;
+    }
+
     private final DotCanvas canvas = new DotCanvas();
     private final int[] frame = new int[DotCanvas.COLS * DotCanvas.ROWS];
     private final int[] bands = new int[SpectrumModule.BANDS];
@@ -124,6 +143,7 @@ public final class RenderHub {
             case ToolboxActivity.F_MUSIC:    music.render(canvas, bands); break;
             case ToolboxActivity.F_SPECTRUM: spectrum.render(canvas, bands); break;
             case ToolboxActivity.F_FROG:     nomi.render(canvas); break;
+            case ToolboxActivity.F_DRAW:     renderDrawing(); break;
             default: canvas.clear(); break;
         }
         System.arraycopy(canvas.px, 0, frame, 0, frame.length);
@@ -137,6 +157,18 @@ public final class RenderHub {
         } catch (Throwable t) {
             Log.e(TAG, "send to back screen failed", t);
         }
+    }
+
+    /** 手绘：直接把画布内容投上去。 */
+    private void renderDrawing() {
+        if (!hasDrawing) {
+            canvas.clear();
+            // 没画过时给个提示：'DRAW'
+            canvas.textFit(9, "DRAW", 90);
+            return;
+        }
+        System.arraycopy(drawFrame, 0, canvas.px, 0,
+                Math.min(drawFrame.length, canvas.px.length));
     }
 
     private void renderVideo() {
