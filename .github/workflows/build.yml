@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 创建 Release 需要
     env:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
