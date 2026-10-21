@@ -23,11 +23,12 @@ public final class DrawView extends View {
     public static final int COLS = 17;
     public static final int ROWS = 23;
 
-    /** 格子间距（像素），让用户能看清每一格。 */
-    private float gap = 0f;
-    private float cell = 0f;
-    private float step = 0f;   // 格心间距
+    /** 布局缓存：由 ensureLayout() 算出，onDraw 和触摸命中共用同一份。 */
+    private float gap = 0f;      // 视觉缝隙
+    private float cell = 0f;     // 格子边长（正方形）
+    private float step = 0f;     // 格心间距
     private float originX = 0f, originY = 0f;
+    private boolean laidOut = false;
 
     private final Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -67,6 +68,13 @@ public final class DrawView extends View {
     public DrawView(android.content.Context context, android.util.AttributeSet a, int defStyleAttr) {
         super(context, a, defStyleAttr);
         init();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int ow, int oh) {
+        super.onSizeChanged(w, h, ow, oh);
+        laidOut = false;
+        invalidate();
     }
 
     private void init() {
@@ -125,6 +133,8 @@ public final class DrawView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         try {
+            // 触摸可能早于首帧 onDraw，先把布局算出来
+            if (!laidOut) ensureLayout(getWidth(), getHeight());
             int action = e.getActionMasked();
             float x = e.getX(), y = e.getY();
             int col = colAt(x), row = rowAt(y);
@@ -183,18 +193,47 @@ public final class DrawView extends View {
     }
 
     private int colAt(float x) {
-        if (cell <= 0) return -1;
+        if (step <= 0) return -1;
         int c = (int) ((x - originX) / step);
         return (c < 0 || c >= COLS) ? -1 : c;
     }
 
     private int rowAt(float y) {
-        if (cell <= 0) return -1;
+        if (step <= 0) return -1;
         int r = (int) ((y - originY) / step);
         return (r < 0 || r >= ROWS) ? -1 : r;
     }
 
     // ---------------- 绘制 ----------------
+
+    /**
+     * 算布局并写入字段。
+     *
+     * 必须写成「赋值给字段」而不是「声明同名局部变量」——
+     * 否则局部变量会遮蔽字段，触摸命中的 colAt/rowAt 读到的是永远 0 的字段，
+     * 结果是画布看得到但点不动。
+     */
+    private boolean ensureLayout(int vw, int vh) {
+        float availW = vw - 12f;
+        float availH = vh - 12f;
+        if (availW <= 0 || availH <= 0) return false;
+
+        // 背屏物理是 17 列 x 23 行。每列等宽、每行等高，
+        // 所以「一列宽 : 一行高」必须等于 17:23，否则整块形变。
+        // step = 一列宽 = 一行高，视觉缝隙从 step 里扣，不参与比例。
+        this.step = Math.min(availW / COLS, availH / ROWS);
+        this.cell = step / 1.16f;
+        if (cell <= 0) return false;
+        this.gap = step - cell;
+
+        // 占位 = 17 个格距 - 1 个缝隙（最后一格右边不重复算缝隙）
+        float gridW = COLS * step - gap;
+        float gridH = ROWS * step - gap;
+        this.originX = (vw - gridW) / 2f;
+        this.originY = (vh - gridH) / 2f;
+        this.laidOut = true;
+        return true;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -203,34 +242,7 @@ public final class DrawView extends View {
             int vw = getWidth(), vh = getHeight();
             if (vw <= 0 || vh <= 0) return;
 
-            // 格子必须正方形，并且整体保持背屏的 17:23 竖向比例。
-            //
-            // 关键：间隙只是视觉分隔，不能破坏比例。
-            // 如果按「格子+间隙」算总宽，间隙会额外拉宽整体，比例就偏了。
-            // 正确做法：先按 17:23 算出可用的总尺寸，再把间隙从里面扣掉。
-            float availW = vw - 12f;
-            float availH = vh - 12f;
-            if (availW <= 0 || availH <= 0) return;
-
-            // 背屏物理是 17 列 x 23 行的一整块矩形区域。
-            // 每一列占同样的宽度，每一行占同样的高度，
-            // 所以「一列宽 : 一行高」必须等于 17:23 —— 否则整块会形变。
-            //
-            // 也就是说：列方向的可用宽 / 17  必须等于 行方向的可用高 / 23。
-            // 但我们不一定要把可用空间全用满（长边受限时短边会留白），
-            // 所以取一个统一的「单位格距」step，同时满足两个方向。
-            float unitW = availW / COLS;
-            float unitH = availH / ROWS;
-            float step = Math.min(unitW, unitH);
-            float cell = step / 1.16f;      // 视觉缝隙占格距的 1/16
-            if (cell <= 0) return;
-            gap = step - cell;
-
-            // 占位宽度 = 17 个格距 - 1 个缝隙（最后一格右边不重复算缝隙）
-            float gridW = COLS * step - gap;
-            float gridH = ROWS * step - gap;
-            originX = (vw - gridW) / 2f;
-            originY = (vh - gridH) / 2f;
+            if (!ensureLayout(vw, vh)) return;
 
             for (int r = 0; r < ROWS; r++) {
                 for (int c = 0; c < COLS; c++) {

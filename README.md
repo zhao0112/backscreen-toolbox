@@ -1,6 +1,6 @@
-# 背屏工具箱 · Back Screen Toolbox
+# STEP NEO 背屏
 
-为 **STEPX Neo（StepOS / Android 16）** 背面那块 **17×23 点阵屏**做的 Android 工具箱。
+为 **STEP NEO（StepOS / Android 16）** 背面那块 **17×23 点阵屏**做的 Android 应用。
 
 把手机背面朝向自己，屏幕上看到的是一块 391 点的单色像素屏。这个 App 让你自己决定
 上面显示什么：计时器、通知消息、音乐律动、麦克风频谱，或者一只会表达状态的 **NOMI 表情**。

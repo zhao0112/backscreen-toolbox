@@ -95,7 +95,7 @@ public final class BackScreenService extends Service {
         } else {
             b = new Notification.Builder(this);
         }
-        b.setContentTitle("背屏工具箱")
+        b.setContentTitle("STEP NEO 背屏")
                 .setContentText("背屏运行中")
                 .setSmallIcon(android.R.drawable.ic_menu_compass)
                 .setOngoing(true);

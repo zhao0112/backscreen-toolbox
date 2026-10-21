@@ -423,7 +423,7 @@ public final class ToolboxActivity extends Activity {
         Log.e(TAG, "FATAL " + msg);
         try {
             android.app.AlertDialog.Builder b = new android.app.AlertDialog.Builder(this);
-            b.setTitle("背屏工具箱启动失败");
+            b.setTitle("STEP NEO 背屏启动失败");
             b.setMessage(msg + "\n\n已写入 crash.log");
             b.setPositiveButton("退出", new android.content.DialogInterface.OnClickListener() {
                 @Override public void onClick(android.content.DialogInterface d, int w) { finish(); }
