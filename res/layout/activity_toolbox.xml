@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/tb_root"
+    android:background="@color/canvas">
+
+    <!-- ===== 滚动内容 ===== -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="24dp">
+
+            <!-- 标题行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="背屏"
+                        android:textSize="25sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02"
+                        android:textColor="@color/ink" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="阶跃 Neo · 17×23 点阵"
+                        android:textSize="12.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tb_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="已连接"
+                    android:textSize="11sp"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
+
+            <!-- ===== HERO：实时预览 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_hero"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="背屏预览"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.11"
+                        android:textAllCaps="true"
+                        android:textColor="@color/ink4" />
+
+                    <TextView
+                        android:id="@+id/tb_hero_now"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="动画"
+                        android:textSize="13.5sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/ink" />
+                </LinearLayout>
+
+                <com.local.backscreengame.DotView
+                    android:id="@+id/tb_dots"
+                    android:layout_width="match_parent"
+                    android:layout_height="330dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_dots" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tb_hero_sub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="正在加载…"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="亮度 0–255"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 背屏电源 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="背屏电源"
+                        android:textSize="14.5sp"
+                        android:textColor="@color/ink" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="关闭后停止推送帧，后台服务同时停止"
+                        android:textSize="12sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+
+                <com.local.backscreengame.ToggleSwitch
+                    android:id="@+id/tb_power"
+                    android:layout_width="46dp"
+                    android:layout_height="27dp" />
+            </LinearLayout>
+
+            <!-- ===== 正在显示 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="正在显示"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.11"
+                    android:textAllCaps="true"
+                    android:textColor="@color/ink4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6 种"
+                    android:textSize="12sp"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
+
+            <!-- 第一行：动画 / 计时器 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_video"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_video"
+                            android:tint="@color/ink2"
+                            android:contentDescription="动画" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="动画"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="12 秒循环"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+
+                <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_timer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_timer"
+                            android:tint="@color/ink2"
+                            android:contentDescription="计时器" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="计时器"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="番茄钟 25:00"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 第二行：消息 / 音乐 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_msg"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_msg"
+                            android:tint="@color/ink2"
+                            android:contentDescription="消息" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="消息"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="等待通知"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+
+                <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_music"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_music"
+                            android:tint="@color/ink2"
+                            android:contentDescription="音乐" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="音乐"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="均衡器"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 第三行：频谱 / NOMI -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_spec"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_spectrum"
+                            android:tint="@color/ink2"
+                            android:contentDescription="频谱" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="频谱"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="实时波形"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+
+                <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+                <LinearLayout
+                    android:id="@+id/tb_tile_frog"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
+                    android:clickable="true" android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/ic_frog"
+                            android:tint="@color/ink2"
+                            android:contentDescription="NOMI 表情" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:tag="label"
+                            android:text="NOMI"
+                            android:textSize="14sp"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp"
+                        android:tag="sub"
+                        android:text="待机表情"
+                        android:textSize="11.5sp"
+                        android:textColor="@color/ink3" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 上下文：频谱专属 ===== -->
+            <LinearLayout
+                android:id="@+id/tb_context"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:paddingTop="11dp"
+                android:paddingBottom="11dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="频谱"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:textAllCaps="true"
+                    android:textColor="@color/ink4" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="麦克风"
+                            android:textSize="13.5sp"
+                            android:textColor="@color/ink" />
+
+                        <TextView
+                            android:id="@+id/tb_mic_state"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="未开启"
+                            android:textSize="11.5sp"
+                            android:textColor="@color/ink3" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tb_mic_action"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_tool"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="9dp"
+                        android:paddingBottom="9dp"
+                        android:text="开启采集"
+                        android:textSize="12sp"
+                        android:textColor="@color/ink2"
+                        android:clickable="true" android:focusable="true" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 上下文：消息专属 ===== -->
+            <LinearLayout
+                android:id="@+id/tb_notif_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:paddingTop="11dp"
+                android:paddingBottom="11dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="消息"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:textAllCaps="true"
+                    android:textColor="@color/ink4" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="通知使用权"
+                            android:textSize="13.5sp"
+                            android:textColor="@color/ink" />
+
+                        <TextView
+                            android:id="@+id/tb_notif_state"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="未授权"
+                            android:textSize="11.5sp"
+                            android:textColor="@color/ink3" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tb_notif_action"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_tool"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="9dp"
+                        android:paddingBottom="9dp"
+                        android:text="去授权"
+                        android:textSize="12sp"
+                        android:textColor="@color/ink2"
+                        android:clickable="true" android:focusable="true" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 状态行 -->
+            <TextView
+                android:id="@+id/tb_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="启动中…"
+                android:textSize="11.5sp"
+                android:textColor="@color/ink4" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/view_bottom_nav" />
+</LinearLayout>

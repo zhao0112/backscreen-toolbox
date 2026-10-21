@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ===== 画布与层级 ===== -->
+    <color name="canvas">#FF08090A</color>          <!-- 页面底 -->
+    <color name="panel">#FF0F1011</color>            <!-- 面板 -->
+    <color name="surface">#FF191A1B</color>          <!-- 卡片 -->
+    <color name="surface_2">#FF202124</color>        <!-- 悬浮层 -->
+
+    <!-- ===== 文字四级 ===== -->
+    <color name="ink">#FFF7F8F8</color>              <!-- 主文字 -->
+    <color name="ink2">#FFD0D6E0</color>             <!-- 次要 -->
+    <color name="ink3">#FF9BA3AD</color>             <!-- 辅助 -->
+    <color name="ink4">#FF767C85</color>             <!-- 极弱 -->
+
+    <!-- ===== 强调色：唯一彩色 ===== -->
+    <color name="accent">#FF35E0B0</color>
+    <color name="accent_hi">#FF9CFFE3</color>
+    <color name="accent_dim">#FF1E8E72</color>
+    <color name="accent_bg">#1F35E0B0</color>
+    <color name="warn">#FFFF9F45</color>
+    <color name="danger">#FFFF6B6B</color>
+
+    <!-- ===== 描边：半透明白，不用实色 ===== -->
+    <color name="line">#14FFFFFF</color>
+    <color name="line_soft">#0AFFFFFF</color>
+    <color name="line_accent">#6B35E0B0</color>
+
+    <!-- ===== 点阵预览 ===== -->
+    <color name="dot_bg">#FF05070A</color>
+    <color name="dot_off">#FF131A21</color>
+
+    <!-- ===== 旧资源保留（供未重写的布局引用） ===== -->
+    <color name="bg">#FF08090C</color>
+    <color name="bg_grad_top">#FF0E151C</color>
+    <color name="bg_grad_bottom">#FF070A0D</color>
+    <color name="card">#FF101820</color>
+    <color name="card_hi">#FF16232B</color>
+    <color name="stroke">#FF1E2A33</color>
+    <color name="stroke_hi">#FF2A3A45</color>
+    <color name="food">#FFFF9F45</color>
+    <color name="text">#FFEAF2F5</color>
+    <color name="text_dim">#FF93A3AE</color>
+    <color name="text_mute">#FFA7B7C2</color>
+    <color name="on_accent">#FF062018</color>
+    <color name="icon_bg">#FF0B0F14</color>
+    <color name="icon_grid">#FF22312B</color>
+    <color name="icon_snake">#FF35E0B0</color>
+    <color name="icon_head">#FF9CFFE3</color>
+    <color name="fg">#FFE9ECF1</color>
+</resources>

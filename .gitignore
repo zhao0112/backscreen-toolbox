@@ -1,0 +1,20 @@
+# build output
+build/
+dist/
+*.apk
+*.aab
+*.idsig
+
+# local dev files
+local.properties
+.gradle/
+.idea/
+*.iml
+.DS_Store
+*.log
+
+# 签名材料：绝不提交
+*.p12
+*.jks
+*.keystore
+keystore.properties

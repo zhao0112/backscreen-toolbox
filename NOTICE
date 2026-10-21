@@ -1,0 +1,14 @@
+背屏工具箱 Back Screen Toolbox
+================================
+
+本项目包含来自 https://github.com/xzl01/back-screen-game 的代码：
+
+  src/com/local/backscreengame/BackScreen.java
+
+该文件在 HarryLoong (xzl01) 的原始实现基础上沿用，MIT License。
+原始版权声明保留在该文件头部，许可全文见 LICENSE。
+
+本仓库其余代码（背屏渲染中枢、各功能模块、界面、自研 FFT、
+NOMI 表情精灵等）为 zhao0112 原创。
+
+本项目不包含任何第三方视频或音乐素材；默认使用程序化生成的动画。

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="@color/icon_grid" android:pathData="M33.3,23.8h3.4v3.4h-3.4zM42.8,23.8h3.4v3.4h-3.4zM52.3,23.8h3.4v3.4h-3.4zM61.8,23.8h3.4v3.4h-3.4zM71.3,23.8h3.4v3.4h-3.4zM33.3,33.3h3.4v3.4h-3.4zM42.8,33.3h3.4v3.4h-3.4zM52.3,33.3h3.4v3.4h-3.4zM61.8,33.3h3.4v3.4h-3.4zM71.3,33.3h3.4v3.4h-3.4zM33.3,42.8h3.4v3.4h-3.4zM42.8,42.8h3.4v3.4h-3.4zM52.3,42.8h3.4v3.4h-3.4zM61.8,42.8h3.4v3.4h-3.4zM71.3,42.8h3.4v3.4h-3.4zM33.3,52.3h3.4v3.4h-3.4zM42.8,52.3h3.4v3.4h-3.4zM52.3,52.3h3.4v3.4h-3.4zM61.8,52.3h3.4v3.4h-3.4zM71.3,52.3h3.4v3.4h-3.4zM33.3,61.8h3.4v3.4h-3.4zM42.8,61.8h3.4v3.4h-3.4zM52.3,61.8h3.4v3.4h-3.4zM61.8,61.8h3.4v3.4h-3.4zM71.3,61.8h3.4v3.4h-3.4zM33.3,71.3h3.4v3.4h-3.4zM42.8,71.3h3.4v3.4h-3.4zM52.3,71.3h3.4v3.4h-3.4zM61.8,71.3h3.4v3.4h-3.4zM71.3,71.3h3.4v3.4h-3.4zM33.3,80.8h3.4v3.4h-3.4zM42.8,80.8h3.4v3.4h-3.4zM52.3,80.8h3.4v3.4h-3.4zM61.8,80.8h3.4v3.4h-3.4zM71.3,80.8h3.4v3.4h-3.4z"/>
+    <path android:fillColor="@color/icon_snake" android:pathData="M41.7,70.2h5.6v5.6h-5.6zM41.7,60.7h5.6v5.6h-5.6zM51.2,60.7h5.6v5.6h-5.6zM51.2,51.2h5.6v5.6h-5.6zM60.7,51.2h5.6v5.6h-5.6zM60.7,41.7h5.6v5.6h-5.6z"/>
+    <path android:fillColor="@color/icon_head" android:pathData="M69.7,41.2h6.6v6.6h-6.6z"/>
+    <path android:fillColor="@color/food" android:pathData="M32.2,32.2h5.6v5.6h-5.6z"/>
+</vector>

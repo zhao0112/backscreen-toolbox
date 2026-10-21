@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">背屏工具箱</string>
+    <string name="amoo_maze_prompt">请生成一个 17 列 × 23 行的点阵迷宫：\n用 # 表示墙、. 表示通路、o 表示宝珠（4 个）、\nP 表示起点、E 表示出口，只输出迷宫文本，不要解释。</string>
+    <string name="btn_play">播放 / 暂停</string>
+    <string name="btn_loop">循环开关</string>
+    <string name="btn_stop">停止并复位</string>
+</resources>

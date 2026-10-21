@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  共享底部导航。三个页面共用，避免每页各写一份导致不一致。
+  选中态由各 Activity 通过 setSelectedTab() 控制。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_nav"
+    android:minHeight="64dp"
+    android:paddingTop="9dp"
+    android:paddingBottom="22dp">
+
+    <LinearLayout
+        android:id="@+id/nav_back"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true" android:focusable="true">
+
+        <ImageView
+            android:id="@+id/nav_back_icon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:src="@drawable/ic_nav_screen"
+            android:tint="@color/ink4"
+            android:contentDescription="背屏" />
+        <TextView
+            android:id="@+id/nav_back_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="背屏"
+            android:textSize="10.5sp"
+            android:textColor="@color/ink4" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/nav_timer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true" android:focusable="true">
+
+        <ImageView
+            android:id="@+id/nav_timer_icon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:src="@drawable/ic_timer"
+            android:tint="@color/ink4"
+            android:contentDescription="计时器" />
+        <TextView
+            android:id="@+id/nav_timer_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="计时器"
+            android:textSize="10.5sp"
+            android:textColor="@color/ink4" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/nav_settings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true" android:focusable="true">
+
+        <ImageView
+            android:id="@+id/nav_settings_icon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:src="@drawable/ic_nav_gear"
+            android:tint="@color/ink4"
+            android:contentDescription="设置" />
+        <TextView
+            android:id="@+id/nav_settings_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="设置"
+            android:textSize="10.5sp"
+            android:textColor="@color/ink4" />
+    </LinearLayout>
+</LinearLayout>
