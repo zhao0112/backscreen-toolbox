@@ -16,6 +16,26 @@ public final class DotCanvas {
 
     public DotCanvas() { clear(); }
 
+    /**
+     * 整体亮度缩放。
+     *
+     * 为什么需要：陪伴在夜里必须变暗，否则整块 MiniLED 亮着很扰人。
+     * 但具体画什么内容时要拿原始亮度，所以 dim 只在"内容画完之后"
+     * 调用一次，不影响绘制过程。
+     *
+     * factor: 0=全黑，1=原样，>1 会截断到 255。
+     */
+    public void dim(float factor) {
+        if (factor >= 1f) return;
+        if (factor < 0f) factor = 0f;
+        for (int i = 0; i < px.length; i++) {
+            int v = px[i];
+            if (v == 0) continue;
+            int nv = (int) (v * factor);
+            px[i] = nv > 255 ? 255 : (nv < 0 ? 0 : nv);
+        }
+    }
+
     public void clear() { java.util.Arrays.fill(px, 0); }
 
     public void set(int col, int row, int v) {

@@ -1,5 +1,9 @@
 package com.local.backscreengame;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -35,13 +39,19 @@ public final class Companion {
 
     private static final String TAG = "Companion";
 
-    /** 情绪状态。背屏只显示这些，不显示文字。 */
-    public static final int S_IDLE = 0;      // 静默陪伴：几乎不亮
-    public static final int S_LISTEN = 1;    // 聆听：你在说话，它在听
-    public static final int S_HAPPY = 2;     // 开心：副歌到了 / 好消息
-    public static final int S_THINK = 3;     // 思考：正在处理
+    /**
+     * 情绪状态。只描述「它在干什么」。
+     *
+     * 亮度不是状态 —— 它是贯穿所有状态的独立维度，见 brightness()。
+     * 把亮度做成状态是错的：夜里收到通知不该"变成另一个状态"，
+     * 而应该是"通知脸 + 很暗"。
+     */
+    public static final int S_IDLE = 0;      // 静默：一颗呼吸点
+    public static final int S_LISTEN = 1;    // 聆听：你真的在说话
+    public static final int S_HAPPY = 2;     // 开心：副歌到了
+    public static final int S_THINK = 3;     // 思考：通知后在想是谁
     public static final int S_NOTIFY = 4;    // 通知：有人找你
-    public static final int S_SLEEP = 5;     // 睡觉：深夜
+    public static final int S_SLEEP = 5;     // 睡觉：闭眼，几乎熄灭
 
     private boolean on = false;
     private int state = S_IDLE;
@@ -56,21 +66,95 @@ public final class Companion {
     private float musicEnergy = 0f;
     private float musicPeak = 0f;
 
-    /** 麦克风是否在工作（有人在说话）。 */
-    private boolean listening = false;
+    /** 麦克风是否在工作。 */
+    private boolean micOn = false;
+
+    /** 你现在是不是真的在说话（由 RenderHub.isSpeaking() 喂进来）。 */
+    private boolean speaking = false;
+
+    /** 环境光（lux），0 表示传感器不可用。 */
+    private float ambientLux = -1f;
+
+    /**
+     * 当前亮度系数（0–1）。
+     *
+     * 环境光没有传感器时退回时钟判断。
+     * 这个值必须平滑过渡 —— 亮度突然跳变在暗处非常刺眼。
+     */
+    private float brightness = 1.0f;
 
     /** 距离上次「有意义的交互」过了多久。 */
     private long lastInteraction = 0;
 
     private final SpriteAnim anim = NomiFace.anim();
 
+    // ---------------- 环境光传感器 ----------------
+    //
+    // 为什么需要：夜里它还全亮，是因为之前没有亮度调节。
+    // 只用时钟判断白天/夜晚是不够的 ——
+    // 白天在暗房间里、或者夜里开着灯，真实光线和时钟完全相反。
+
+    private SensorManager sensorManager;
+    private Sensor lightSensor;
+    private boolean lightAvailable = false;
+
+    /**
+     * 启动环境光监听。
+     *
+     * 这台机器可能没有光线传感器（背屏设备常配的是距离/接近传感器），
+     * 所以启动失败要能安静地退回时钟判断，而不是崩。
+     */
+    public void startLightSensor(android.content.Context ctx) {
+        try {
+            sensorManager = (SensorManager) ctx.getSystemService(
+                    android.content.Context.SENSOR_SERVICE);
+            if (sensorManager == null) return;
+            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            if (lightSensor == null) {
+                // 没有光线传感器：ambientLux 保持 -1，走时钟兜底
+                lightAvailable = false;
+                Log.i(TAG, "no light sensor, using clock");
+                return;
+            }
+            lightAvailable = sensorManager.registerListener(
+                    lightListener, lightSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+            Log.i(TAG, "light sensor registered: " + lightAvailable);
+        } catch (Throwable t) {
+            lightAvailable = false;
+            Log.w(TAG, "light sensor failed", t);
+        }
+    }
+
+    private final SensorEventListener lightListener = new SensorEventListener() {
+        @Override public void onSensorChanged(SensorEvent e) {
+            try {
+                if (e == null || e.values == null || e.values.length < 1) return;
+                ambientLux = e.values[0];
+            } catch (Throwable ignore) { }
+        }
+        @Override public void onAccuracyChanged(Sensor s, int a) { }
+    };
+
+    private void stopLightSensor() {
+        try {
+            if (sensorManager != null && lightAvailable) {
+                sensorManager.unregisterListener(lightListener);
+            }
+        } catch (Throwable ignore) { }
+    }
+
     // ---------------- 开关 ----------------
 
     public boolean isOn() { return on; }
 
-    public void start() {
+    private android.content.Context appCtx;
+
+    public void start(android.content.Context ctx) {
         if (on) return;
         on = true;
+        appCtx = ctx;
+        startLightSensor(ctx);
         since = SystemClock.elapsedRealtime();
         lastInteraction = since;
         state = S_IDLE;
@@ -81,10 +165,12 @@ public final class Companion {
     public void stop() {
         if (!on) return;
         on = false;
+        stopLightSensor();
         state = S_IDLE;
         musicEnergy = 0f;
         musicPeak = 0f;
-        listening = false;
+        micOn = false;
+        speaking = false;
         Log.i(TAG, "companion stop");
     }
 
@@ -98,7 +184,7 @@ public final class Companion {
     /** 当前状态的短文案，给设置页显示用。 */
     public String stateName() {
         switch (state) {
-            case S_LISTEN: return "在听";
+            case S_LISTEN: return "在听你说话";
             case S_HAPPY: return "开心";
             case S_THINK: return "在想事情";
             case S_NOTIFY: return "有消息";
@@ -130,10 +216,57 @@ public final class Companion {
         musicPeak = peak;
     }
 
-    /** 麦克风是否在工作。 */
-    public void setListening(boolean on) {
-        listening = on;
+    /** 麦克风是否在工作（只是权限/状态，不代表有人在说话）。 */
+    public void setMicOn(boolean on) {
+        micOn = on;
     }
+
+    /**
+     * 你是不是真的在说话。
+     *
+     * 这个和「麦克风开着」是两件事：
+     * 麦克风开着可能只是频谱功能在跑，环境里没人说话。
+     */
+    public void setSpeaking(boolean on) {
+        speaking = on;
+    }
+
+    /** 环境光（lux）。传负数表示不可用。 */
+    public void setAmbientLight(float lux) {
+        ambientLux = lux;
+    }
+
+    /**
+     * 目标亮度：按环境光算，夜间暗、白天亮。
+     *
+     * 环境光不可用时退回时钟 —— 但时钟只是兜底，
+     * 因为白天在暗房间里 / 夜里开着灯，靠时钟是错的。
+     */
+    private float targetBrightness() {
+        float t;
+        if (ambientLux >= 0) {
+            // 环境光越暗越暗。50lux 以下接近全黑环境。
+            if (ambientLux <= 8) t = 0.10f;         // 深夜/关灯
+            else if (ambientLux <= 60) t = 0.22f;   // 夜晚室内
+            else if (ambientLux <= 250) t = 0.55f;  // 傍晚/阴天
+            else t = 1.0f;                           // 白天
+        } else {
+            // 兜底：没有传感器，用时钟
+            int h = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
+            if (h >= 23 || h < 6) t = 0.10f;
+            else if (h < 9 || h >= 19) t = 0.45f;
+            else t = 1.0f;
+        }
+        // 睡眠态再压暗一档
+        if (state == S_SLEEP) t = Math.min(t, 0.16f);
+        return t;
+    }
+
+    /** 当前亮度系数（给 UI 显示用）。 */
+    public float brightness() { return brightness; }
+
+    /** 环境光不可用时为 true（UI 要告诉用户用的是时钟判断）。 */
+    public boolean lightUnknown() { return ambientLux < 0; }
 
     // ---------------- 状态推进 ----------------
 
@@ -159,26 +292,33 @@ public final class Companion {
         long now = SystemClock.elapsedRealtime();
         long silent = now - lastInteraction;
 
-        // 深夜自动睡觉
-        int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
-        if (hour >= 23 || hour < 6) {
-            state = S_SLEEP;
-            return;
+        // 亮度平滑过渡：暗处跳变非常刺眼，所以每帧只走一小步。
+        float target = targetBrightness();
+        float diff = target - brightness;
+        if (Math.abs(diff) > 0.002f) {
+            // 变暗比变亮慢一点 —— 突然变亮更刺眼
+            float rate = diff < 0 ? 0.004f : 0.010f;
+            brightness += diff * rate;
+            if (Math.abs(target - brightness) < 0.01f) brightness = target;
         }
 
-        // 通知态持续一段时间后，转成思考
+        // 通知态持续一段时间后转思考
         if (state == S_NOTIFY && silent > 8000L) {
             state = S_THINK;
         }
-        // 思考态再过一段时间，回归静默
         if (state == S_THINK && silent > 20000L) {
             state = S_IDLE;
         }
 
-        // 麦克风在工作 = 你在说话 = 它在听
-        if (listening && silent < 4000L) {
+        // 你真的在说话 -> 看着你。
+        // 注意是 speaking（真实人声检测），不是 micOn（麦克风开着）。
+        if (speaking) {
             state = S_LISTEN;
             return;
+        }
+        // 说完话之后回到静默，不要一直停在聆听脸
+        if (state == S_LISTEN && !speaking) {
+            state = S_IDLE;
         }
 
         // 音乐能量突变 = 副歌 = 开心
@@ -190,13 +330,27 @@ public final class Companion {
             state = S_IDLE;
         }
 
-        // 长时间没有任何交互 = 睡觉（白天也算疲倦）
-        if (silent > 300_000L && state == S_IDLE) {
+        // 深夜睡觉：优先看环境光（真黑了就睡），
+        // 传感器不可用时退回时钟。
+        boolean dark = false;
+        if (ambientLux >= 0) {
+            dark = ambientLux <= 8;
+        } else {
+            int hour = java.util.Calendar.getInstance().get(
+                    java.util.Calendar.HOUR_OF_DAY);
+            dark = hour >= 23 || hour < 6;
+        }
+        if (dark && (state == S_IDLE || state == S_HAPPY)) {
             state = S_SLEEP;
             return;
         }
-        if (silent < 30_000L && state == S_SLEEP) {
+        if (!dark && state == S_SLEEP) {
             state = S_IDLE;
+        }
+
+        // 白天太久不理它也会犯困
+        if (silent > 300_000L && state == S_IDLE && !dark) {
+            state = S_SLEEP;
         }
     }
 
@@ -239,6 +393,9 @@ public final class Companion {
                     renderBreathing(c);
                     break;
             }
+            // 亮度是独立维度：所有状态画完之后统一缩放。
+            // 不是"某个状态很暗"，而是"不管什么状态，晚上都暗"。
+            c.dim(brightness);
         } catch (Throwable t) {
             // 宁可这一帧不画，也不能让推帧循环挂掉
             try { c.clear(); } catch (Throwable ignore) { }
@@ -257,8 +414,10 @@ public final class Companion {
         double phase = (t % 70) / 70.0;
         // 用余弦做呼吸曲线，底部不是全黑，而是留一点
         double v = (1 - Math.cos(phase * Math.PI * 2)) / 2.0;
-        int center = 11 * 17 + 8;    // 中心点
-        int bright = 40 + (int) (v * 90);
+        // 呼吸点放在正中（17x23 的中心是第 11 行，第 8 列）
+        int center = 11 * DotCanvas.COLS + 8;
+        // 满亮度 190 —— 之后会被 dim() 按环境光缩放
+        int bright = 60 + (int) (v * 130);
         c.px[center] = bright;
 
         // 偶尔（每 12 秒）向外扩一圈涟漪 —— "我还在"
@@ -273,7 +432,7 @@ public final class Companion {
                         int rr = 11 + dr, cc = 8 + dc;
                         if (rr >= 0 && rr < DotCanvas.ROWS && cc >= 0 && cc < DotCanvas.COLS) {
                             if (c.px[rr * DotCanvas.COLS + cc] == 0) {
-                                c.px[rr * DotCanvas.COLS + cc] = 30;
+                                c.px[rr * DotCanvas.COLS + cc] = 55;
                             }
                         }
                     }
@@ -285,6 +444,6 @@ public final class Companion {
     /** 供设置页显示的一句状态说明。 */
     public String describe() {
         if (!on) return "未开启";
-        return stateName() + " · 安静 " + silentMinutes() + " 分钟";
+        return stateName() + " · 亮度 " + Math.round(brightness * 100) + "%";
     }
 }

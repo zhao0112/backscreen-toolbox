@@ -71,7 +71,7 @@ public final class ToolboxActivity extends Activity {
                 int[] f = hub.renderInto();
             // 频谱/音乐的能量喂给陪伴（副歌时它会亮一下）
             try {
-                hub.companion.setListening(hub.isAudioRunning());
+                hub.companion.setMicOn(hub.isAudioRunning());
             } catch (Throwable ignore) { }
                 if (dotView != null) dotView.setFrame(f);
             } catch (Throwable t) {

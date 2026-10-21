@@ -89,7 +89,7 @@ public final class CompanionActivity extends Activity {
 
     private void setCompanion(boolean on) {
         if (on) {
-            companion.start();
+            companion.start(this);
             Toast.makeText(this, "陪伴已开启", Toast.LENGTH_SHORT).show();
         } else {
             companion.stop();
@@ -108,8 +108,19 @@ public final class CompanionActivity extends Activity {
             stateView.setTextColor(companion.isOn() ? 0xFF35E0B0 : 0xFF6B7480);
         }
         if (silentView != null) {
+            // 把"它到底怎么知道我在不在说话"讲清楚。
+            // 用户看不��这套机制，就只能靠猜。
+            StringBuilder sb = new StringBuilder();
             long m = companion.silentMinutes();
-            silentView.setText(m < 1 ? "一直在你身边" : "安静了 " + m + " 分钟");
+            sb.append(m < 1 ? "一直在你身边" : "安静了 " + m + " 分钟");
+            sb.append("\n");
+            sb.append("亮度 ").append(Math.round(companion.brightness() * 100)).append("%");
+            if (companion.lightUnknown()) {
+                sb.append(" · 这台机器没有光线传感器，按时钟判断明暗");
+            } else {
+                sb.append(" · 按环境光自动调节");
+            }
+            silentView.setText(sb.toString());
         }
         if (switchView != null) {
             switchView.setText(companion.isOn() ? "已开启" : "开启陪伴");

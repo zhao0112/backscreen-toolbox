@@ -121,6 +121,68 @@ public final class RenderHub {
 
     public int[] bands() { return bands; }
 
+    /**
+     * 人声强度（0–1），用来判断「你是不是在说话」。
+     *
+     * 为什么不能用 isAudioRunning()：
+     * 麦克风开着不等于人在说话。之前把"麦克风开着"当成"用户在说话"，
+     * 结果只要频谱功能开着，它就一直以为你在讲话。
+     *
+     * 人声的频段特征：能量集中在中频（300Hz–3.4kHz），
+     * 高频（>6kHz）很少，低频（<150Hz，多是空调/风扇）不算。
+     * 所以只看中频能量，并减去环境底噪。
+     */
+    public float voiceLevel = 0f;
+
+    /** 环境底噪（自适应），说话检测的基准线。 */
+    private float noiseFloor = 0.06f;
+
+    /** 最近一次真的检测到说话的时间。 */
+    private long lastVoiceAt = 0;
+
+    /**
+     * 从频谱算人声强度。只在人声频段累加，避开低频噪声。
+     */
+    private float computeVoiceLevel() {
+        if (bands == null || bands.length == 0) return 0f;
+        // MiniFFT 输出的是频段峰值，0-255。
+        // 频段索引大约对应：0 最低频 ... BANDS-1 最高频。
+        // 人声主要在中低频，取前 60% 的频段，避开最高频的嘶声。
+        int voiceBands = (int) (bands.length * 0.6f);
+        float sum = 0f;
+        int n = 0;
+        for (int i = 0; i < voiceBands; i++) {
+            sum += bands[i] > 0 ? bands[i] : 0;
+            n++;
+        }
+        if (n == 0) return 0f;
+        float avg = sum / n / 255f;      // 归一化到 0-1
+
+        // 自适应底噪：安静时慢慢跟随环境音，有声音时不跟
+        if (avg < noiseFloor) {
+            noiseFloor = noiseFloor * 0.98f + avg * 0.02f;
+        } else {
+            noiseFloor = noiseFloor * 0.9995f + avg * 0.0005f;
+        }
+
+        // 减去底噪，再放大差异
+        float v = (avg - noiseFloor) / 0.18f;
+        return v < 0f ? 0f : (v > 1f ? 1f : v);
+    }
+
+    /**
+     * 你现在是不是在说话。
+     *
+     * 需要持续超过 400ms 才算"在说" ——
+     * 单帧的爆音（关门、咳嗽一下）不应该触发表情切换。
+     */
+    public boolean isSpeaking() {
+        if (voiceLevel > 0.35f) {
+            lastVoiceAt = System.currentTimeMillis();
+        }
+        return System.currentTimeMillis() - lastVoiceAt < 700L;
+    }
+
     // ---------------- 渲染 ----------------
 
     /**
@@ -135,6 +197,8 @@ public final class RenderHub {
     }
 
     private void renderFrame() {
+        // 先更新陪伴的说话状态（每帧一次，20fps 足够）
+        feedCompanionVoice();
         int content = AppState.get().backContent;
         switch (content) {
             case ToolboxActivity.F_VIDEO:    renderVideo(); break;
@@ -166,6 +230,13 @@ public final class RenderHub {
     }
 
     /** 手绘：直接把画布内容投上去。 */
+    /** 把"你是不是在说话"喂给陪伴。用真实人声检测，不是麦克风开关。 */
+    private void feedCompanionVoice() {
+        try {
+            companion.setSpeaking(audioRunning && isSpeaking());
+        } catch (Throwable ignore) { }
+    }
+
     private void renderDrawing() {
         if (!hasDrawing) {
             canvas.clear();
@@ -323,6 +394,7 @@ public final class RenderHub {
                         int total = carry + n;
                         if (total >= MiniFFT.N) {
                             int[] spec = fft.spectrum(buf, MiniFFT.N);
+        voiceLevel = computeVoiceLevel();
                             if (spec != null) {
                                 for (int b = 0; b < SpectrumModule.BANDS; b++) {
                                     int lo = b * spec.length / SpectrumModule.BANDS;
