@@ -69,6 +69,10 @@ public final class ToolboxActivity extends Activity {
         public void run() {
             try {
                 int[] f = hub.renderInto();
+            // 频谱/音乐的能量喂给陪伴（副歌时它会亮一下）
+            try {
+                hub.companion.setListening(hub.isAudioRunning());
+            } catch (Throwable ignore) { }
                 if (dotView != null) dotView.setFrame(f);
             } catch (Throwable t) {
                 if (!renderErrorShown) {
@@ -144,7 +148,10 @@ public final class ToolboxActivity extends Activity {
             @Override
             public void onNewMessage(String source, String text, boolean isCode) {
                 message.show(source, text, isCode);
-                if (currentFeature() == F_MESSAGE) hub.onContentChanged();
+                hub.notifyCompanion();
+                if (currentFeature() == F_MESSAGE || currentFeature() == F_FROG) {
+                    hub.onContentChanged();
+                }
             }
         });
 
@@ -153,7 +160,7 @@ public final class ToolboxActivity extends Activity {
         bindContent(R.id.tb_tile_msg, F_MESSAGE);
         bindContent(R.id.tb_tile_music, F_MUSIC);
         bindContent(R.id.tb_tile_spec, F_SPECTRUM);
-        bindContent(R.id.tb_tile_frog, F_FROG);
+
 
         // 背屏电源
         try {
@@ -213,6 +220,23 @@ public final class ToolboxActivity extends Activity {
                 });
             }
         } catch (Throwable t) { Log.e(TAG, "draw bind failed", t); }
+
+        // 陪伴入口（独立入口，不是内容卡）
+        try {
+            View companionEntry = findViewById(R.id.tb_companion_entry);
+            if (companionEntry != null) {
+                companionEntry.setOnClickListener(new View.OnClickListener() {
+                    @Override public void onClick(View v) {
+                        try {
+                            startActivity(new Intent(ToolboxActivity.this,
+                                    CompanionActivity.class));
+                        } catch (Throwable t) {
+                            Log.e(TAG, "open companion failed", t);
+                        }
+                    }
+                });
+            }
+        } catch (Throwable t) { Log.e(TAG, "companion bind failed", t); }
 
         // 底部导航（共享组件）
         try {
@@ -302,7 +326,7 @@ public final class ToolboxActivity extends Activity {
                 if (!name.isEmpty()) sb.append(" · ").append(name);
 
                 String live = "";
-                if (currentFeature() == F_VIDEO) live = hub.videoCount() > 0 ? " · 循环" : " · 内置动画";
+                if (currentFeature() == F_VIDEO && hub.videoCount() > 0) live = " · 循环";
                 if (currentFeature() == F_SPECTRUM) live = hub.isAudioRunning() ? " · 实时" : "";
                 sb.append(live);
                 statusView.setText(sb.toString());
@@ -335,6 +359,16 @@ public final class ToolboxActivity extends Activity {
                 }
             } catch (Throwable ignore) { }
 
+            // 陪伴入口状态
+            try {
+                TextView cs = findViewById(R.id.tb_companion_state);
+                if (cs != null) {
+                    Companion cp = hub.companion;
+                    cs.setText(cp.isOn() ? cp.stateName() : "开启陪伴");
+                    cs.setTextColor(cp.isOn() ? 0xFF35E0B0 : 0xFF35E0B0);
+                }
+            } catch (Throwable ignore) { }
+
             // 手绘状态
             try {
                 TextView ds = findViewById(R.id.tb_draw_state);
@@ -346,8 +380,8 @@ public final class ToolboxActivity extends Activity {
 
             // 内容卡的选中态
             int[] ids = { R.id.tb_tile_video, R.id.tb_tile_timer, R.id.tb_tile_msg,
-                          R.id.tb_tile_music, R.id.tb_tile_spec, R.id.tb_tile_frog };
-            int[] feats = { F_VIDEO, F_TIMER, F_MESSAGE, F_MUSIC, F_SPECTRUM, F_FROG };
+                          R.id.tb_tile_music, R.id.tb_tile_spec };
+            int[] feats = { F_VIDEO, F_TIMER, F_MESSAGE, F_MUSIC, F_SPECTRUM };
             for (int i = 0; i < ids.length; i++) {
                 try {
                     View v = findViewById(ids[i]);
@@ -415,7 +449,7 @@ public final class ToolboxActivity extends Activity {
     }
 
     private static final String[] CONTENT_NAMES = {
-        "动画", "计时器", "消息", "音乐", "频谱", "NOMI 表情", "手绘"
+        "视频", "计时器", "消息", "音乐", "频谱", "NOMI 表情"
     };
 
     /** 致命错误：用系统对话框，不依赖本 App 布局。 */

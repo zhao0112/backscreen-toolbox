@@ -7,6 +7,16 @@ package com.local.backscreengame;
  * 所以没有歌名时也能动起来。
  */
 public final class MusicModule {
+
+    /**
+     * 最近一次的能量值（0–1），给陪伴模式判断"副歌到了"用。
+     * 不用 AudioSession 的音量（那是振幅不是感知响度），
+     * 而是频谱总能量的归一化值。
+     */
+    public float energy = 0f;
+
+    /** 能量峰值追踪，用于检测突变（副歌 = 能量突然升高）。 */
+    public float peak = 0f;
     public String title = "";
     public String artist = "";
     public boolean playing;

@@ -28,13 +28,15 @@ public final class RenderHub {
     public final MusicModule music = new MusicModule();
     public final SpectrumModule spectrum = new SpectrumModule();
     public final SpriteAnim nomi = NomiFace.anim();
+
+    /** 陪伴模式：独立于"正在显示"的内容选择。 */
+    public final Companion companion = new Companion();
     public final TimerModule timer = TimerStore.get();
 
     /** 手绘画布（全局一份，切页面也不丢）。 */
     private final int[] drawFrame = new int[DotCanvas.COLS * DotCanvas.ROWS];
     private boolean hasDrawing = false;
 
-    /** 设置手绘画面（来自 DrawView）。 */
     public void setDrawing(int[] frame) {
         if (frame == null) return;
         System.arraycopy(frame, 0, drawFrame, 0,
@@ -61,8 +63,6 @@ public final class RenderHub {
     private int videoCount;
     private int videoFps = 10;
     private int videoCursor;
-    private boolean useBuiltinAnim = false;
-    private float builtinPhase = 0f;
 
     // 频谱采集
     private AudioRecord recorder;
@@ -140,9 +140,19 @@ public final class RenderHub {
             case ToolboxActivity.F_VIDEO:    renderVideo(); break;
             case ToolboxActivity.F_TIMER:    timer.tick(); timer.render(canvas); break;
             case ToolboxActivity.F_MESSAGE:  message.tick(); message.render(canvas); break;
-            case ToolboxActivity.F_MUSIC:    music.render(canvas, bands); break;
+            case ToolboxActivity.F_MUSIC:
+                // 音乐能量喂给陪伴：副歌时它会亮一下
+                try {
+                    companion.setMusic(spectrumEnergy(bands), spectrumPeak(bands));
+                } catch (Throwable ignore) { }
+                music.render(canvas, bands);
+                break;
             case ToolboxActivity.F_SPECTRUM: spectrum.render(canvas, bands); break;
-            case ToolboxActivity.F_FROG:     nomi.render(canvas); break;
+            // 陪伴开启时接管 NOMI 内容位；没开启就退回原表情动画
+            case ToolboxActivity.F_FROG:
+                if (companion.isOn()) companion.render(canvas);
+                else nomi.render(canvas);
+                break;
             case ToolboxActivity.F_DRAW:     renderDrawing(); break;
             default: canvas.clear(); break;
         }
@@ -163,7 +173,6 @@ public final class RenderHub {
     private void renderDrawing() {
         if (!hasDrawing) {
             canvas.clear();
-            // 没画过时给个提示：'DRAW'
             canvas.textFit(9, "DRAW", 90);
             return;
         }
@@ -171,11 +180,31 @@ public final class RenderHub {
                 Math.min(drawFrame.length, canvas.px.length));
     }
 
+    /** 通知来了：陪伴模式只给表情，不给内容。 */
+    public void notifyCompanion() {
+        companion.onNotify();
+    }
+
+    /** 频谱总能量（0–1），用于判断音乐是否在响。 */
+    private float spectrumEnergy(int[] b) {
+        if (b == null) return 0f;
+        float sum = 0f;
+        for (int v : b) sum += v > 0 ? v : 0;
+        float avg = sum / (float) (b.length > 0 ? b.length : 1);
+        return Math.min(1f, avg / 160f);
+    }
+
+    /** 频谱峰值（0–1），能量突变 = 副歌到了。 */
+    private float spectrumPeak(int[] b) {
+        if (b == null) return 0f;
+        int mx = 0;
+        for (int v : b) if (v > mx) mx = v;
+        return Math.min(1f, mx / 255f);
+    }
+
     private void renderVideo() {
         if (videoCount == 0 || videoData == null || videoOffsets == null) {
-            // 无素材 -> 内置程序化动画
-            if (useBuiltinAnim) renderBuiltinAnim();
-            else canvas.clear();
+            canvas.clear();
             return;
         }
         int off = videoOffsets[videoCursor];
@@ -211,36 +240,9 @@ public final class RenderHub {
                         | ((idx[o + 3] & 0xFF) << 24);
             }
         } catch (Throwable e) {
-            // 没有素材时不算错误：改用内置的程序化动画
-            Log.i(TAG, "no video assets, using built-in animation: " + e);
+            Log.e(TAG, "loadVideo failed", e);
             videoCount = 0; videoData = null; videoOffsets = null;
-            useBuiltinAnim = true;
         }
-    }
-
-    /**
-     * 内置程序化动画（无素材时的回退）。
-     * 一个旋转的螺旋 + 呼吸光晕，纯算法生成，不含任何第三方素材。
-     */
-    private void renderBuiltinAnim() {
-        builtinPhase += 0.045f;
-        if (builtinPhase > 6.2832f) builtinPhase -= 6.2832f;
-
-        java.util.Arrays.fill(canvas.px, 0);
-        float cx = 8.0f, cy = 11.0f;
-        for (float t = 0; t < 6.2832f; t += 0.22f) {
-            float ang = t + builtinPhase;
-            float r = 1.0f + t * 1.25f;
-            int x = Math.round(cx + r * (float) Math.cos(ang));
-            int y = Math.round(cy + r * (float) Math.sin(ang) * 0.85f);
-            if (x < 0 || x >= 17 || y < 0 || y >= 23) continue;
-            // 越靠外越暗，形成渐隐
-            int v = 255 - Math.round(t * 26f);
-            if (v < 40) v = 40;
-            canvas.px[y * 17 + x] = v;
-        }
-        // 中心一点
-        canvas.px[11 * 17 + 8] = 255;
     }
 
     private static byte[] readAll(java.io.InputStream is) throws java.io.IOException {

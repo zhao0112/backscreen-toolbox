@@ -197,7 +197,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="6 种"
+                    android:text="5 种"
                     android:textSize="12sp"
                     android:textColor="@color/accent" />
             </LinearLayout>
@@ -387,7 +387,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 第三行：频谱 / NOMI -->
+            <!-- 第三行：频谱 / 陪伴入口 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -421,7 +421,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:tag="label"
                             android:text="频谱"
                             android:textSize="14sp"
                             android:textColor="@color/ink" />
@@ -430,7 +429,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="9dp"
-                        android:tag="sub"
                         android:text="实时波形"
                         android:textSize="11.5sp"
                         android:textColor="@color/ink3" />
@@ -438,13 +436,14 @@
 
                 <Space android:layout_width="8dp" android:layout_height="1dp" />
 
+                <!-- 陪伴入口：不是内容卡，是独立入口 -->
                 <LinearLayout
-                    android:id="@+id/tb_tile_frog"
+                    android:id="@+id/tb_companion_entry"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/bg_card_hi"
                     android:padding="12dp"
                     android:clickable="true" android:focusable="true">
 
@@ -458,26 +457,28 @@
                             android:layout_width="19dp"
                             android:layout_height="19dp"
                             android:src="@drawable/ic_frog"
-                            android:tint="@color/ink2"
-                            android:contentDescription="NOMI 表情" />
+                            android:tint="@color/accent"
+                            android:contentDescription="陪伴" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:tag="label"
-                            android:text="NOMI"
+                            android:text="陪伴"
                             android:textSize="14sp"
+                            android:textStyle="bold"
                             android:textColor="@color/ink" />
                     </LinearLayout>
                     <TextView
+                        android:id="@+id/tb_companion_state"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="9dp"
-                        android:tag="sub"
-                        android:text="待机表情"
+                        android:text="开启陪伴"
                         android:textSize="11.5sp"
-                        android:textColor="@color/ink3" />
+                        android:textColor="@color/accent" />
                 </LinearLayout>
+
+            </LinearLayout>
 
             <!-- ===== 手绘入口 ===== -->
             <LinearLayout
@@ -532,7 +533,6 @@
                     android:tint="@color/ink4"
                     android:rotation="90"
                     android:contentDescription="进入" />
-            </LinearLayout>
             </LinearLayout>
 
             <!-- ===== 上下文：频谱专属 ===== -->

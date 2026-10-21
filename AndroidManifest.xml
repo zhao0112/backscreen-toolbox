@@ -30,6 +30,11 @@
             android:label="手绘"
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
+            android:name=".CompanionActivity"
+            android:exported="false"
+            android:label="陪伴"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
             android:name=".TimerManageActivity"
             android:exported="false"
             android:screenOrientation="portrait"
