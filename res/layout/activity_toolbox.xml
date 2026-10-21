@@ -387,7 +387,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 第三行：频谱 / 陪伴入口 -->
+            <!-- 第三行：频谱（独占一行）-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -432,50 +432,6 @@
                         android:text="实时波形"
                         android:textSize="11.5sp"
                         android:textColor="@color/ink3" />
-                </LinearLayout>
-
-                <Space android:layout_width="8dp" android:layout_height="1dp" />
-
-                <!-- 陪伴入口：不是内容卡，是独立入口 -->
-                <LinearLayout
-                    android:id="@+id/tb_companion_entry"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card_hi"
-                    android:padding="12dp"
-                    android:clickable="true" android:focusable="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="19dp"
-                            android:layout_height="19dp"
-                            android:src="@drawable/ic_frog"
-                            android:tint="@color/accent"
-                            android:contentDescription="陪伴" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="陪伴"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/ink" />
-                    </LinearLayout>
-                    <TextView
-                        android:id="@+id/tb_companion_state"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
-                        android:text="开启陪伴"
-                        android:textSize="11.5sp"
-                        android:textColor="@color/accent" />
                 </LinearLayout>
 
             </LinearLayout>

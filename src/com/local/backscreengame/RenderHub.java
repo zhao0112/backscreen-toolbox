@@ -148,11 +148,7 @@ public final class RenderHub {
                 music.render(canvas, bands);
                 break;
             case ToolboxActivity.F_SPECTRUM: spectrum.render(canvas, bands); break;
-            // 陪伴开启时接管 NOMI 内容位；没开启就退回原表情动画
-            case ToolboxActivity.F_FROG:
-                if (companion.isOn()) companion.render(canvas);
-                else nomi.render(canvas);
-                break;
+            case ToolboxActivity.F_FROG:     companion.render(canvas); break;
             case ToolboxActivity.F_DRAW:     renderDrawing(); break;
             default: canvas.clear(); break;
         }

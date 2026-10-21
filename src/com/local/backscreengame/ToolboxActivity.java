@@ -221,22 +221,6 @@ public final class ToolboxActivity extends Activity {
             }
         } catch (Throwable t) { Log.e(TAG, "draw bind failed", t); }
 
-        // 陪伴入口（独立入口，不是内容卡）
-        try {
-            View companionEntry = findViewById(R.id.tb_companion_entry);
-            if (companionEntry != null) {
-                companionEntry.setOnClickListener(new View.OnClickListener() {
-                    @Override public void onClick(View v) {
-                        try {
-                            startActivity(new Intent(ToolboxActivity.this,
-                                    CompanionActivity.class));
-                        } catch (Throwable t) {
-                            Log.e(TAG, "open companion failed", t);
-                        }
-                    }
-                });
-            }
-        } catch (Throwable t) { Log.e(TAG, "companion bind failed", t); }
 
         // 底部导航（共享组件）
         try {
@@ -356,16 +340,6 @@ public final class ToolboxActivity extends Activity {
                 if (ma != null) {
                     ma.setText(hub.isAudioRunning() ? "关闭采集"
                             : (hasMicPermission() ? "开启采集" : "去授权"));
-                }
-            } catch (Throwable ignore) { }
-
-            // 陪伴入口状态
-            try {
-                TextView cs = findViewById(R.id.tb_companion_state);
-                if (cs != null) {
-                    Companion cp = hub.companion;
-                    cs.setText(cp.isOn() ? cp.stateName() : "开启陪伴");
-                    cs.setTextColor(cp.isOn() ? 0xFF35E0B0 : 0xFF35E0B0);
                 }
             } catch (Throwable ignore) { }
 

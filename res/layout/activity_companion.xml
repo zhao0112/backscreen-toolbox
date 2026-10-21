@@ -43,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="它一直在，不用你操作"
+                    android:text="切到这个 tab，背屏就是它"
                     android:textSize="12.5sp"
                     android:textColor="@color/ink3" />
             </LinearLayout>
@@ -132,7 +132,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="开启后它会一直陪着你，不占你注意力"
+                        android:text="背屏一次只能显示一样东西，所以陪伴独占一个 tab"
                         android:textSize="12sp"
                         android:textColor="@color/ink3" />
                 </LinearLayout>

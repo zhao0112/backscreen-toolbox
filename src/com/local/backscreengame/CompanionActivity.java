@@ -71,8 +71,21 @@ public final class CompanionActivity extends Activity {
             });
         }
 
+        // 底部导航
+        try {
+            nav = new NavBar(this, findViewById(R.id.cp_root));
+            nav.setSelected(NavBar.TAB_COMPANION);
+        } catch (Throwable ignore) { }
+
+        // 进页面就把背屏切到陪伴 ——
+        // 和计时器页同一套规则：你在哪个 tab，背屏就是那个东西。
+        AppState.get().backContent = ToolboxActivity.F_FROG;
+        RenderHub.get().onContentChanged();
+
         updateState();
     }
+
+    private NavBar nav;
 
     private void setCompanion(boolean on) {
         if (on) {
@@ -82,6 +95,10 @@ public final class CompanionActivity extends Activity {
             companion.stop();
             Toast.makeText(this, "陪伴已关闭", Toast.LENGTH_SHORT).show();
         }
+        // 开关切了也要保证背屏内容是陪伴，
+        // 否则用户在这里开了开关，背屏还在显示频谱。
+        AppState.get().backContent = ToolboxActivity.F_FROG;
+        RenderHub.get().onContentChanged();
         updateState();
     }
 
@@ -102,6 +119,10 @@ public final class CompanionActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // 每次回到这个 tab 都把背屏切回来 ——
+        // 你可能刚从频谱页过来，背屏还显示着频谱。
+        AppState.get().backContent = ToolboxActivity.F_FROG;
+        RenderHub.get().onContentChanged();
         handler.post(tick);
         updateState();
     }

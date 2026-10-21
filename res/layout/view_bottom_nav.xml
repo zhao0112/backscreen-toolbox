@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  共享底部导航。三个页面共用，避免每页各写一份导致不一致。
-  选中态由各 Activity 通过 setSelectedTab() 控制。
+  共享底部导航。四个页面共用，避免每页各写一份导致不一致。
+
+  四个 tab 的含义不一样，这是刻意的：
+    背屏    —— 看现在背屏显示什么，换内容
+    计时器  —— 计时器是「当场用完就走」的工具
+    陪伴    —— 陪伴是「一直在」的，不是一个可选项
+    设置    —— 配置
+
+  关键规则：切到哪个 tab，背屏就显示那个 tab 的内容。
+  这是单一内容位的约定 —— 背屏一次只能显示一种东西，
+  所以「陪伴」不能和频谱、视频并存，必须是 tab 而不是卡片。
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -60,6 +69,32 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="计时器"
+            android:textSize="10.5sp"
+            android:textColor="@color/ink4" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/nav_companion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true" android:focusable="true">
+
+        <ImageView
+            android:id="@+id/nav_companion_icon"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:src="@drawable/ic_nomi"
+            android:tint="@color/ink4"
+            android:contentDescription="陪伴" />
+        <TextView
+            android:id="@+id/nav_companion_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="陪伴"
             android:textSize="10.5sp"
             android:textColor="@color/ink4" />
     </LinearLayout>

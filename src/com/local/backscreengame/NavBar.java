@@ -7,19 +7,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * 底部导航栏。三个页面共用同一套逻辑，保证行为一致。
+ * 底部导航栏。四个页面共用同一套逻辑，保证行为一致。
  *
  * 职责：
  * - 切换页面
  * - 显示选中态（薄荷绿）
  *
- * 每个页面在 onResume 时调用 attach()，指定自己是哪个 tab。
+ * 关键约定：切到哪个 tab，背屏就显示那个 tab 的内容。
+ * 背屏只有一个内容位，所以「陪伴」必须是 tab 而不是内容卡 ——
+ * 否则它会和频谱、视频抢同一个位置，开启了也看不到。
  */
 public final class NavBar {
 
     public static final int TAB_BACK = 0;
     public static final int TAB_TIMER = 1;
-    public static final int TAB_SETTINGS = 2;
+    public static final int TAB_COMPANION = 2;
+    public static final int TAB_SETTINGS = 3;
 
     private final Activity act;
     private final View root;
@@ -47,6 +50,14 @@ public final class NavBar {
                 act.finish();
             }
         });
+        // 陪伴 tab
+        find(R.id.nav_companion).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (act instanceof CompanionActivity) return;
+                act.startActivity(new Intent(act, CompanionActivity.class));
+                act.finish();
+            }
+        });
         // 设置 tab
         find(R.id.nav_settings).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -61,6 +72,7 @@ public final class NavBar {
     public void setSelected(int tab) {
         paint(R.id.nav_back_icon, R.id.nav_back_text, tab == TAB_BACK);
         paint(R.id.nav_timer_icon, R.id.nav_timer_text, tab == TAB_TIMER);
+        paint(R.id.nav_companion_icon, R.id.nav_companion_text, tab == TAB_COMPANION);
         paint(R.id.nav_settings_icon, R.id.nav_settings_text, tab == TAB_SETTINGS);
     }
 
