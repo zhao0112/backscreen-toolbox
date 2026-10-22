@@ -2,6 +2,7 @@ package com.local.backscreengame;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -81,6 +82,8 @@ public final class CompanionActivity extends Activity {
         // 和计时器页同一套规则：你在哪个 tab，背屏就是那个东西。
         AppState.get().backContent = ToolboxActivity.F_FROG;
         RenderHub.get().onContentChanged();
+        // 用户回来看它了 —— 记一笔，否则「多久没理它」会一直累加。
+        companion.poke();
 
         updateState();
     }
@@ -134,13 +137,53 @@ public final class CompanionActivity extends Activity {
         // 你可能刚从频谱页过来，背屏还显示着频谱。
         AppState.get().backContent = ToolboxActivity.F_FROG;
         RenderHub.get().onContentChanged();
+        companion.poke();
         handler.post(tick);
         updateState();
+        // 陪伴页自己开麦。
+        // 之前 startAudio() 只在 ToolboxActivity（频谱页）里调用，
+        // 于是进陪伴页时 bands 全是 0、voiceLevel 恒 0，
+        // 人声检测形同虚设 —— 它永远感知不到你在说话。
+        ensureMic();
+    }
+
+    /** 麦克风只在这里开一次；没有权限就引导去频谱页授权。 */
+    private void ensureMic() {
+        RenderHub hub = RenderHub.get();
+        if (hub.isAudioRunning()) return;
+        try {
+            if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{android.Manifest.permission.RECORD_AUDIO}, 101);
+                return;
+            }
+            hub.startAudio(this);
+        } catch (Throwable t) {
+            Log.e("CompanionActivity", "mic start failed", t);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            if (grantResults.length > 0
+                    && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                ensureMic();
+            } else {
+                Toast.makeText(this, "没有麦克风权限，它听不见你说话", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         handler.removeCallbacks(tick);
+        // 离开陪伴页不关麦 —— 频谱页和陪伴页共用同一个采集器，
+        // 关掉会导致切页瞬间 bands 归零，误判成「环境安静」。
+        // 真正释放由前台服务负责。
     }
 }

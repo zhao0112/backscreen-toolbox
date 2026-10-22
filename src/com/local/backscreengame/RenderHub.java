@@ -53,6 +53,7 @@ public final class RenderHub {
 
     private final DotCanvas canvas = new DotCanvas();
     private final int[] frame = new int[DotCanvas.COLS * DotCanvas.ROWS];
+    /** FFT 线程写、渲染线程读 —— 数组元素不是 volatile，靠整型读保证可见性。 */
     private final int[] bands = new int[SpectrumModule.BANDS];
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -132,7 +133,8 @@ public final class RenderHub {
      * 高频（>6kHz）很少，低频（<150Hz，多是空调/风扇）不算。
      * 所以只看中频能量，并减去环境底噪。
      */
-    public float voiceLevel = 0f;
+    /** volatile：FFT 线程写、渲染线程读，跨线程必须可见。 */
+    public volatile float voiceLevel = 0f;
 
     /** 环境底噪（自适应），说话检测的基准线。 */
     private float noiseFloor = 0.06f;
@@ -234,6 +236,10 @@ public final class RenderHub {
     private void feedCompanionVoice() {
         try {
             companion.setSpeaking(audioRunning && isSpeaking());
+            // 实时人声强度 —— 底部的声音柱靠它跳动。
+            // 即使没在说话也要喂：voiceLevel=0 时画的是一条平底线，
+            // 表示"麦克风开着，在听"。
+            companion.setVoiceLevel(audioRunning ? voiceLevel : 0f);
         } catch (Throwable ignore) { }
     }
 
@@ -394,7 +400,6 @@ public final class RenderHub {
                         int total = carry + n;
                         if (total >= MiniFFT.N) {
                             int[] spec = fft.spectrum(buf, MiniFFT.N);
-        voiceLevel = computeVoiceLevel();
                             if (spec != null) {
                                 for (int b = 0; b < SpectrumModule.BANDS; b++) {
                                     int lo = b * spec.length / SpectrumModule.BANDS;
@@ -407,6 +412,10 @@ public final class RenderHub {
                                     bands[b] = peak;
                                 }
                             }
+                            // 必须在 bands 更新之后才算人声强度。
+                            // 之前这行在 bands 循环前面，读的是上一轮的陈旧值，
+                            // 慢一拍；刚启动时 bands 全 0，算出来也永远是 0。
+                            voiceLevel = computeVoiceLevel();
                             int rest = total - MiniFFT.N;
                             System.arraycopy(buf, MiniFFT.N, buf, 0, rest);
                             carry = rest;

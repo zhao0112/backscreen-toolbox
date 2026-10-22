@@ -69,6 +69,9 @@ public final class Companion {
     /** 麦克风是否在工作。 */
     private boolean micOn = false;
 
+    /** 人声强度 0–1（由 RenderHub 喂进来），用于画底部的实时声音柱。 */
+    private float voiceLevel = 0f;
+
     /** 你现在是不是真的在说话（由 RenderHub.isSpeaking() 喂进来）。 */
     private boolean speaking = false;
 
@@ -227,6 +230,11 @@ public final class Companion {
      * 这个和「麦克风开着」是两件事：
      * 麦克风开着可能只是频谱功能在跑，环境里没人说话。
      */
+    /** 实时人声强度，用来画底部的声音柱 —— 让"它在听"看得见。 */
+    public void setVoiceLevel(float v) {
+        voiceLevel = v < 0f ? 0f : (v > 1f ? 1f : v);
+    }
+
     public void setSpeaking(boolean on) {
         speaking = on;
     }
@@ -348,8 +356,10 @@ public final class Companion {
             state = S_IDLE;
         }
 
-        // 白天太久不理它也会犯困
-        if (silent > 300_000L && state == S_IDLE && !dark) {
+        // 白天太久不理它也会犯困。
+        // 5 小时 = 18_000_000ms。（之前写成 300_000ms = 5 分钟，
+        // 结果开起来 5 分钟就睡着 —— 而且 poke() 没人调用，永远唤不醒。）
+        if (silent > 5 * 60 * 60 * 1000L && state == S_IDLE && !dark) {
             state = S_SLEEP;
         }
     }
@@ -393,12 +403,49 @@ public final class Companion {
                     renderBreathing(c);
                     break;
             }
+            // 底部实时声音柱 —— 让"它在听"看得见。
+            // 之前人声检测是黑盒：你能看见它切了表情，但不知道
+            // 它到底听见了什么。声音柱把麦克风实时能量画出来，
+            // 说话时柱子跳起来，你立刻知道它收到了。
+            renderVoiceBars(c);
             // 亮度是独立维度：所有状态画完之后统一缩放。
             // 不是"某个状态很暗"，而是"不管什么状态，晚上都暗"。
             c.dim(brightness);
         } catch (Throwable t) {
             // 宁可这一帧不画，也不能让推帧循环挂掉
             try { c.clear(); } catch (Throwable ignore) { }
+        }
+    }
+
+    /**
+     * 底部实时声音柱。
+     *
+     * 5 根柱，居中，底部两行（第 21-22 行）。
+     * 高度由 voiceLevel 驱动 —— 你说话时柱子会跳。
+     *
+     * 为什么必须可见：人声检测是自适应底噪 + 阈值，
+     * 阈值多少只有开发者知道。把实时能量画出来，
+     * 用户能自己判断"它到底听见没有"，不用猜。
+     */
+    private void renderVoiceBars(DotCanvas c) {
+        if (!micOn && voiceLevel <= 0.01f) return;
+        // 麦克风没开的时候画一条平底线，表示"在听但没声音"
+        final int baseRow = 22;
+        final int[] cols = {5, 7, 9, 11, 13};
+        float v = voiceLevel;
+        for (int i = 0; i < cols.length; i++) {
+            // 中间高两边低，看起来像一排跳动的柱
+            float shape = 1f - Math.abs(i - 2) * 0.22f;
+            float h = v * shape * 2f;          // 0..2 行高
+            int lit = (int) (h + 0.5f);
+            if (lit < 1) lit = 1;             // 至少一个点，表示"在听"
+            if (lit > 2) lit = 2;
+            for (int k = 0; k < lit; k++) {
+                int r = baseRow - k;
+                if (r >= 0 && r < DotCanvas.ROWS) {
+                    c.px[r * DotCanvas.COLS + cols[i]] = 200;
+                }
+            }
         }
     }
 
